@@ -46,7 +46,7 @@ raw_sim_ft.repartition(1).write.mode("overwrite").format("csv").save(cloud_stora
 # MAGIC 
 # MAGIC CREATE TABLE subway_foot_traffic  
 # MAGIC USING parquet
-# MAGIC LOCATION '/mnt/field-demos/solution-accelerator/cme/identifying-campaign-effectiveness/subway_foot_traffic'
+# MAGIC LOCATION 's3://db-gtm-industry-solutions/data/cme/visit_attribution/subway_foot_traffic/'
 
 # COMMAND ----------
 
