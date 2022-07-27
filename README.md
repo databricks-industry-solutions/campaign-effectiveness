@@ -1,24 +1,20 @@
-<img src=https://d1r5llqwmkrl74.cloudfront.net/notebooks/fsi/fs-lakehouse-logo-transparent.png width="600px">
+## Identifying Campaign Effectiveness For Forecasting Foot Traffic: ETL
+###### In advertising, one of the most important practices to be able to deliver to clients is information about how their advertising spend drove results -- and the more quickly we can provide the attributed information to clients, the better. To tie an offline activity to the impressions served in an advertising campaign, companies must perform attribution. Attribution can be a fairly expensive process, and running attribution against constantly updating datasets is challenging without the right technology.
 
-[![DBR](https://img.shields.io/badge/DBR-10.4ML-red?logo=databricks&style=for-the-badge)](https://docs.databricks.com/release-notes/runtime/10.4ml.html)
-[![CLOUD](https://img.shields.io/badge/CLOUD-ALL-blue?logo=googlecloud&style=for-the-badge)](https://cloud.google.com/databricks)
-[![POC](https://img.shields.io/badge/POC-10_days-green?style=for-the-badge)](https://databricks.com/try-databricks)
+###### Fortunately, Databricks makes this easy with Unified Data Analytics Platform and Delta.
+#### The main steps taken in this notebook are:  
 
-*Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.*
+* Ingest (mock) Monthly Foot Traffic Time Series in [SafeGraph format](https://www.safegraph.com/points-of-interest-poi-data-guide) - here we've mocked data to fit the schema (Bronze)
+* Convert to monthly time series data - so numeric value for number of vists per date (row = date) (Silver)
+* Restrict to the NYC area for Subway Restaurant (Gold)
+* Exploratory analysis of features: distribution check, variable transoformation (Gold)
 
-___
-<john.doe@databricks.com>
+More information on the SafeGraph data is below: 
 
-___
+#### What is SafeGraph Patterns? 
+* SafeGraph's Places Patterns is a dataset of anonymized and aggregated visitor foot-traffic and visitor demographic data available for ~3.6MM points of interest (POI) in the US. 
+* Here we look at historical data (Jan 2019 - Feb 2020) for a set of limited-service restaurants in-store visits
 
-
-IMAGE TO REFERENCE ARCHITECTURE
-
-___
-
-&copy; 2022 Databricks, Inc. All rights reserved. The source in this notebook is provided subject to the Databricks License [https://databricks.com/db-license-source].  All included or referenced third party libraries are subject to the licenses set forth below.
-
-| library                                | description             | license    | source                                              |
-|----------------------------------------|-------------------------|------------|-----------------------------------------------------|
-| PyYAML                                 | Reading Yaml files      | MIT        | https://github.com/yaml/pyyaml                      |
-
+<div >
+  <img src="https://databricks.com/wp-content/uploads/2020/10/mm-ref-arch-1.png" style="width:1100px;height:550px;">
+</div>
