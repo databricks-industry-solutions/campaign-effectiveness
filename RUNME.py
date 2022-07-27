@@ -74,11 +74,3 @@ from solacc.companion import NotebookSolutionCompanion
 # COMMAND ----------
 
 NotebookSolutionCompanion().deploy_compute(job_json)
-
-# COMMAND ----------
-
-
-
-# COMMAND ----------
-
-
