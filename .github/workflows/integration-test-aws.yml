@@ -56,6 +56,12 @@ jobs:
           }
         }' | jq .run_id)
         echo "$RUN_ID"
+        
+    - name: Wait for integration test AWS
+      env:
+        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
+        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
+      run: |
         LCS=$(databricks runs get --run-id $RUN_ID | jq .state.life_cycle_state)
         while true ; do
           if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
