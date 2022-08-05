@@ -24,11 +24,11 @@ jobs:
     - name: Install mods
       run: |
         pip install databricks-cli
-    - name: Configure CLI
-      run: |
-        echo "${{ secrets.DEPLOYMENT_TARGET_URL_AWS }} ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}" | databricks configure --token
         
     - name: Run integration test AWS
+      env:
+        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
+        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
       run: |
         sudo apt-get install jq
         RUN_ID=$(databricks runs submit --json '{"tasks": [
