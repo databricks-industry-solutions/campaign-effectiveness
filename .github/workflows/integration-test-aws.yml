@@ -1,0 +1,80 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: integration test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+   
+    - name: Install mods
+      run: |
+        pip install databricks-cli
+
+    - name: Configure CLI
+      run: |
+        echo "${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
+        ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}" | databricks configure --token
+        
+    - name: Run integration test AWS
+      run: |
+        sudo apt-get install jq
+        RUN_ID=$(databricks runs submit --json '{"tasks": [
+              {
+                  "task_key": "int_test",
+                  "notebook_task": {
+                      "notebook_path": "RUNME",
+                      "base_parameters": {
+                          "run_job": "True"
+                      },
+                      "source": "GIT"
+                  },
+                  "new_cluster": {
+                      "spark_version": "10.4.x-scala2.12",
+                      "node_type_id": "i3.xlarge",
+                      "num_workers": 1
+                  },
+                  "timeout_seconds": 0
+              }
+          ],
+          "git_source": {
+              "git_url": "${{github.repositoryUrl}}",
+              "git_provider": "gitHub",
+              "git_branch": "main"
+          }
+        }' | jq .run_id)
+        echo "$RUN_ID"
+        LCS=$(databricks runs get --run-id "$RUN_ID" | jq .state.life_cycle_state)
+        while true ; do
+          if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
+            RS=$(databricks runs get --run-id "$RUN_ID" | jq .state.result_state)
+            echo $LCS $RS
+            if [[ "$RS" == *"SUCCESS"* ]]; then
+              exit 0
+            else
+              exit 1
+            fi
+            break
+          fi
+          sleep 2
+          LCS=$(databricks runs get --run-id "$RUN_ID" | jq .state.life_cycle_state)
+          echo $LCS
+        done
+
