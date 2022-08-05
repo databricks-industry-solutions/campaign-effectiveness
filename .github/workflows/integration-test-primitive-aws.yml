@@ -1,0 +1,80 @@
+name: integration test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.8"
+   
+    - name: Install mods
+      run: |
+        pip install databricks-cli
+        sudo apt-get install jq
+        
+    - name: Run integration test AWS
+      env:
+        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
+        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
+      run: |
+        RUN_ID=$(databricks runs submit --json '{"tasks": [
+              {
+                  "task_key": "int_test",
+                  "notebook_task": {
+                      "notebook_path": "RUNME",
+                      "base_parameters": {
+                          "run_job": "True"
+                      },
+                      "source": "GIT"
+                  },
+                  "new_cluster": {
+                      "spark_version": "10.4.x-scala2.12",
+                      "node_type_id": "i3.xlarge",
+                      "num_workers": 1
+                  },
+                  "timeout_seconds": 0
+              }
+          ],
+          "git_source": {
+              "git_url": "${{github.server_url}}/${{github.repository}}.git",
+              "git_provider": "gitHub",
+              "git_branch": "main"
+          }
+        }' | jq -r .run_id)
+        echo "$RUN_ID"
+        
+    - name: Wait for integration test AWS
+      env:
+        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
+        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
+      run: |
+        LCS=$(databricks runs get --run-id $RUN_ID | jq -r .state.life_cycle_state)
+        while true ; do
+          if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
+            RS=$(databricks runs get --run-id $RUN_ID | jq -r .state.result_state)
+            echo $LCS $RS
+            if [[ "$RS" == *"SUCCESS"* ]]; then
+              exit 0
+            else
+              exit 1
+            fi
+            break
+          fi
+          sleep 2
+          LCS=$(databricks runs get --run-id $RUN_ID | jq -r .state.life_cycle_state)
+          echo $LCS
+        done
