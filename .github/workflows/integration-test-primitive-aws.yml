@@ -1,4 +1,4 @@
-name: primitive integration test using CLI
+name: primitive integration test using CLI to submit run
 
 on:
   push:
