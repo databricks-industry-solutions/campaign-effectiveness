@@ -32,7 +32,7 @@ jobs:
         DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
       shell: bash
       run: |
-        echo "##[set-output name=run_id;]$$(databricks runs submit --json '{"tasks": [
+        echo "##[set-output name=run_id;]$(databricks runs submit --json '{"tasks": [
               {
                   "task_key": "int_test",
                   "notebook_task": {
