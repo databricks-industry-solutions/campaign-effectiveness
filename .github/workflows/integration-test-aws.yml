@@ -23,6 +23,7 @@ jobs:
    
     - name: Install mods
       run: |
+        sudo apt-get install jq
         pip install databricks-cli
         
     - name: Run integration test AWS
@@ -30,9 +31,7 @@ jobs:
         DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
         DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
       run: |
-        sudo apt-get install jq
-        RUN_ID=$(databricks runs submit --json '{"tasks": [
-              {
+        RUN_ID=$(databricks runs submit --json '{"tasks": [{
                   "task_key": "int_test",
                   "notebook_task": {
                       "notebook_path": "RUNME",
@@ -55,7 +54,6 @@ jobs:
               "git_branch": "main"
           }
         }' | jq .run_id)
-        echo "$RUN_ID"
         
     - name: Wait for integration test AWS
       env:
