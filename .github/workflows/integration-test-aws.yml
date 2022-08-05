@@ -30,9 +30,10 @@ jobs:
 
     - name: Configure CLI
       run: |
-        echo "${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
-        ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}" | databricks configure --token
-        
+        databricks configure --token << EOF
+        "${{secrets.DEPLOYMENT_TARGET_URL_AWS}}"
+        ${{secrets.DEPLOYMENT_TARGET_TOKEN_AWS}}
+        EOF
     - name: Run integration test AWS
       run: |
         sudo apt-get install jq
@@ -55,7 +56,7 @@ jobs:
               }
           ],
           "git_source": {
-              "git_url": "${{github.repositoryUrl}}",
+              "git_url": "${{github.server_url}}/${{github.repository}}.git",
               "git_provider": "gitHub",
               "git_branch": "main"
           }
