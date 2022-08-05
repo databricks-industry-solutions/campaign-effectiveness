@@ -56,10 +56,10 @@ jobs:
           }
         }' | jq .run_id)
         echo "$RUN_ID"
-        LCS=$(databricks runs get --run-id "$RUN_ID" | jq .state.life_cycle_state)
+        LCS=$(databricks runs get --run-id $RUN_ID | jq .state.life_cycle_state)
         while true ; do
           if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
-            RS=$(databricks runs get --run-id "$RUN_ID" | jq .state.result_state)
+            RS=$(databricks runs get --run-id $RUN_ID | jq .state.result_state)
             echo $LCS $RS
             if [[ "$RS" == *"SUCCESS"* ]]; then
               exit 0
@@ -69,6 +69,6 @@ jobs:
             break
           fi
           sleep 2
-          LCS=$(databricks runs get --run-id "$RUN_ID" | jq .state.life_cycle_state)
+          LCS=$(databricks runs get --run-id $RUN_ID | jq .state.life_cycle_state)
           echo $LCS
         done
