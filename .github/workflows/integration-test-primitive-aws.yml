@@ -32,7 +32,7 @@ jobs:
         DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
       shell: bash
       run: |
-        echo "##[set-output name=run_id;]$(databricks runs submit --json '{"tasks": [
+        databricks runs submit --wait --json '{"tasks": [
               {
                   "task_key": "int_test",
                   "notebook_task": {
@@ -55,27 +55,4 @@ jobs:
               "git_provider": "gitHub",
               "git_branch": "main"
           }
-        }' | jq -r .run_id)"
-      id: get_run_id
-           
-    - name: Wait for integration test AWS
-      env:
-        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
-        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
-      run: |
-        LCS=$(databricks runs get --run-id ${{ steps.get_run_id.outputs.run_id }} | jq -r .state.life_cycle_state)
-        while true ; do
-          if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
-            RS=LCS=$(databricks runs get --run-id ${{ steps.get_run_id.outputs.run_id }} | jq -r .state.result_state)
-            echo $LCS $RS
-            if [[ "$RS" == *"SUCCESS"* ]]; then
-              exit 0
-            else
-              exit 1
-            fi
-            break
-          fi
-          sleep 2
-          LCS=$(databricks runs get --run-id ${{ steps.get_run_id.outputs.run_id }} | jq -r .state.life_cycle_state)
-          echo $LCS
-        done
+        }'
