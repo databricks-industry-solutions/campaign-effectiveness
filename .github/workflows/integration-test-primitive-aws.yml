@@ -1,4 +1,4 @@
-name: integration test
+name: primitive integration test using CLI
 
 on:
   push:
