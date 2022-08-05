@@ -1,6 +1,7 @@
 name: Run a notebook in databricks on PRs
 
 on:
+ workflow_dispatch:
  push:
  pull_request:
 
