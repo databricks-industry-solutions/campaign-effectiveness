@@ -32,8 +32,8 @@ jobs:
         DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
       run: |
         RUN_ID=$(databricks runs submit --json '{"tasks": [{"task_key": "int_test", "notebook_task": {"notebook_path": "RUNME", "base_parameters": {"run_job": "True"}, "source": "GIT"}, "new_cluster": {"spark_version": "10.4.x-scala2.12", "node_type_id": "i3.xlarge", "num_workers": 1}}], "git_source": {"git_url": "${{github.server_url}}/${{github.repository}}.git", "git_provider": "gitHub", "git_branch": "main"}}' | jq .run_id)
-echo $RUN_ID
-        echo $RUN_ID
+
+
     - name: Wait for integration test AWS
       env:
         DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
