@@ -24,7 +24,7 @@ jobs:
     - name: Install mods
       run: |
         sudo apt-get install jq
-        pip install databricks-cli
+        pip install databricks-cli==0.16.3
         
     - name: Run integration test AWS
       env:
