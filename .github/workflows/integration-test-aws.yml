@@ -23,6 +23,7 @@ jobs:
           local-notebook-path: RUNME.py
           databricks-host: https://oregon.cloud.databricks.com
           databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
+          git-branch: main
           new-cluster-json: >
             {
               "num_workers": 1,
