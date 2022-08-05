@@ -1,58 +1,29 @@
-name: integration test
+name: Run a notebook in databricks on PRs
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+ push:
+ pull_request:
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.9"
-   
-    - name: Install mods
-      run: |
-        sudo apt-get install jq
-        pip install databricks-cli==0.16.3
-        
-    - name: Run integration test AWS
-      env:
-        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
-        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
-      run: |
-        databricks jobs configure --version=2.1
-        RUN_ID=$(databricks runs submit --json '{"tasks": [{"task_key": "int_test", "notebook_task": {"notebook_path": "RUNME", "base_parameters": {"run_job": "True"}, "source": "GIT"}, "new_cluster": {"spark_version": "10.4.x-scala2.12", "node_type_id": "i3.xlarge", "num_workers": 1}}], "git_source": {"git_url": "${{github.server_url}}/${{github.repository}}.git", "git_provider": "gitHub", "git_branch": "main"}}' | jq .run_id)
-
-
-    - name: Wait for integration test AWS
-      env:
-        DATABRICKS_HOST: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
-        DATABRICKS_TOKEN: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
-      run: |
-        LCS=$(databricks runs get --run-id $RUN_ID | jq .state.life_cycle_state)
-        while true ; do
-          if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
-            RS=$(databricks runs get --run-id $RUN_ID | jq .state.result_state)
-            echo $LCS $RS
-            if [[ "$RS" == *"SUCCESS"* ]]; then
-              exit 0
-            else
-              exit 1
-            fi
-            break
-          fi
-          sleep 2
-          LCS=$(databricks runs get --run-id $RUN_ID | jq .state.life_cycle_state)
-          echo $LCS
-        done
+ run-databricks-notebook:
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout repo
+       uses: actions/checkout@v2
+     - name: Run a databricks notebook
+       uses: databricks/run-notebook@v0
+       with:
+         local-notebook-path: RUNME.py
+         databricks-host: https://oregon.cloud.databricks.com
+         databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
+         new-cluster-json: >
+           {
+             "num_workers": 1,
+             "spark_version": "10.4.x-scala2.12",
+             "node_type_id": "Standard_D3_v2"
+           }
+         notebook-params-json: >
+           {
+            "run_job": "True"
+           }
+           
