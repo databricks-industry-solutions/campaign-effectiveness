@@ -1,4 +1,4 @@
-name: Run a notebook in databricks on PRs and pushes to main branch
+name: integration test
 
 on:
   push:
@@ -6,33 +6,69 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
- 
-      - name: Trigger notebook in AWS
-        uses: databricks/run-notebook@v0
-        with:
-          local-notebook-path: RUNME.py
-          databricks-host: https://oregon.cloud.databricks.com
-          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
-          git-branch: main
-          new-cluster-json: >
-            {
-              "num_workers": 1,
-              "spark_version": "10.4.x-scala2.12",
-              "node_type_id": "i3.xlarge"
-            }
-          # Grant all users view permission on the notebook results, so that they can
-          # see the result of our CI notebook 
-          access-control-list-json: >
-            [
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+   
+    - name: Install mods
+      run: |
+        pip install databricks-cli
+    - name: Configure CLI
+      run: |
+        echo "${{ secrets.DEPLOYMENT_TARGET_URL_AWS }} ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}" | databricks configure --token
+        
+    - name: Run integration test AWS
+      run: |
+        sudo apt-get install jq
+        RUN_ID=$(databricks runs submit --json '{"tasks": [
               {
-                "group_name": "users",
-                "permission_level": "CAN_VIEW"
+                  "task_key": "int_test",
+                  "notebook_task": {
+                      "notebook_path": "RUNME",
+                      "base_parameters": {
+                          "run_job": "True"
+                      },
+                      "source": "GIT"
+                  },
+                  "new_cluster": {
+                      "spark_version": "10.4.x-scala2.12",
+                      "node_type_id": "i3.xlarge",
+                      "num_workers": 1
+                  },
+                  "timeout_seconds": 0
               }
-            ]
+          ],
+          "git_source": {
+              "git_url": "${{github.server_url}}/${{github.repository}}.git",
+              "git_provider": "gitHub",
+              "git_branch": "main"
+          }
+        }' | jq .run_id)
+        echo "$RUN_ID"
+        LCS=$(databricks runs get --run-id "$RUN_ID" | jq .state.life_cycle_state)
+        while true ; do
+          if [[ "$LCS" == *"TERMINATED"* ]] || [[ "$LCS" == *"SKIPPED"* ]] || [[ "$LCS" == *"INTERNAL_ERROR"* ]]; then
+            RS=$(databricks runs get --run-id "$RUN_ID" | jq .state.result_state)
+            echo $LCS $RS
+            if [[ "$RS" == *"SUCCESS"* ]]; then
+              exit 0
+            else
+              exit 1
+            fi
+            break
+          fi
+          sleep 2
+          LCS=$(databricks runs get --run-id "$RUN_ID" | jq .state.life_cycle_state)
+          echo $LCS
+        done
