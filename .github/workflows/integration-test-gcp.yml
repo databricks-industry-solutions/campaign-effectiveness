@@ -1,4 +1,4 @@
-name: Run a notebook in databricks on PRs
+name: GCP integration test
 
 on:
  workflow_dispatch:
