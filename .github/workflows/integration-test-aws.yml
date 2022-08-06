@@ -1,4 +1,4 @@
-name: Run a notebook in databricks on PRs
+name: AWS integration test
 
 on:
  workflow_dispatch:
