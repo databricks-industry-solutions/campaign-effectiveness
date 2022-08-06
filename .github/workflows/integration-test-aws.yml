@@ -16,7 +16,7 @@ jobs:
        with:
          local-notebook-path: RUNME.py
          workspace-temp-dir: /Users/jingting.lu@databricks.com/
-         databricks-host: https://e2-demo-field-eng.cloud.databricks.com
+         databricks-host: ${{ secrets.DEPLOYMENT_TARGET_URL_AWS }}
          databricks-token: ${{ secrets.DEPLOYMENT_TARGET_TOKEN_AWS }}
          new-cluster-json: >
            {
