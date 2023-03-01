@@ -13,9 +13,9 @@
 # MAGIC #### The main steps taken in this notebook are:  
 # MAGIC 
 # MAGIC * Ingest (mock) Monthly Foot Traffic Time Series in [SafeGraph format](https://www.safegraph.com/points-of-interest-poi-data-guide) - here we've mocked data to fit the schema (Bronze)
-# MAGIC * Convert to monthly time series data - so numeric value for number of vists per date (row = date) (Silver)
+# MAGIC * Convert to monthly time series data - so numeric value for number of visits per date (row = date) (Silver)
 # MAGIC * Restrict to the NYC area for Subway Restaurant (Gold)
-# MAGIC * Exploratory analysis of features: distribution check, variable transoformation (Gold)
+# MAGIC * Exploratory analysis of features: distribution check, variable transformation (Gold)
 # MAGIC 
 # MAGIC More information on the SafeGraph data is below: 
 # MAGIC 
