@@ -19,17 +19,17 @@
 
 # MAGIC %md
 # MAGIC 
-# MAGIC #### In this notebook, we are going to look closely at foot traffic in New York City (the currated dataset) to understand how Subway Restaurants' various advertising campaign efforts drive the in-store visits. The goal of this workflow is 
-# MAGIC ###### 1. To create a machine learning approach that, given a set of new compaign ads effort, predicts the in-store number of visits 
-# MAGIC ###### 2. Leverage SHAP model intepreter, given a time series foot traffic in-store visits, quantify how much they were driven by a centain media channel.
+# MAGIC #### In this notebook, we are going to look closely at foot traffic in New York City (the curated dataset) to understand how Subway Restaurants' various advertising campaign efforts drive the in-store visits. The goal of this workflow is 
+# MAGIC ###### 1. To create a machine learning approach that, given a set of new campaign ads effort, predicts the in-store number of visits 
+# MAGIC ###### 2. Leverage SHAP model interpreter, given a time series foot traffic in-store visits, quantify how much they were driven by a certain media channel.
 # MAGIC 
 # MAGIC #### The main steps taken in this notebook are: 
 # MAGIC 
 # MAGIC * Read in exploded versions of the curated Gold table which contains the NYC area Subway Restaurant daily time series Safegraphe foot traffic
-# MAGIC * Exploratory analysis of features: distribution check, variable transoformation
+# MAGIC * Exploratory analysis of features: distribution check, variable transformation
 # MAGIC * Xgboost model to predict number of store visits: modern attribution model with Databricks mlflow, HyperOpt, AutoML
 # MAGIC * Ascertaining the effectiveness of each Media input on the Foot Traffic. Make a conclusion on whether or not different media channels campaign were effective
-# MAGIC * Use SHAP to inteprate the attribution of each media channel for the in store Foot Traffic, and make actionable insight/ recommendation of media spend optimization
+# MAGIC * Use SHAP to interpret the attribution of each media channel for the in store Foot Traffic, and make actionable insight/ recommendation of media spend optimization
 
 # COMMAND ----------
 
@@ -131,7 +131,7 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 df_plot = city_pdf.copy()
-fig = make_subplots( rows=5, cols=1, subplot_titles=("Store Vists", "Banner Impression", "Social Media Like", "Google Trend", "Landing Page Visit"))
+fig = make_subplots( rows=5, cols=1, subplot_titles=("Store Visits", "Banner Impression", "Social Media Like", "Google Trend", "Landing Page Visit"))
 
 fig.add_trace(go.Scatter(x=df_plot['date'], y=df_plot['num_visits']), row=1, col=1, )
 fig.add_trace(go.Bar(x=df_plot['date'], y=df_plot['banner_imp']), row=2, col=1)
